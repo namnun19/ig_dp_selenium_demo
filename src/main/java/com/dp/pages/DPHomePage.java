@@ -11,6 +11,9 @@ public class DPHomePage extends BasePage {
     @FindBy(xpath = "//footer//a[contains(text(), 'Privacy Policy')]")
     private WebElement privacyPolicyLink;
 
+    @FindBy(xpath = "//footer//a[contains(text(), 'Explore Disney+')]")
+    private WebElement exploreDPLink;
+
     public DPHomePage(WebDriver driver) {
         super(driver);
     }
@@ -23,5 +26,11 @@ public class DPHomePage extends BasePage {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", privacyPolicyLink);
         wait.until(ExpectedConditions.elementToBeClickable(privacyPolicyLink));
         privacyPolicyLink.click();
+    }
+
+    public void clickExploreDP() {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", exploreDPLink);
+        wait.until(ExpectedConditions.elementToBeClickable(exploreDPLink));
+        exploreDPLink.click();
     }
 }

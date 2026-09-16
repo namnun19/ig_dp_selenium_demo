@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import com.dp.pages.DPHomePage;
 import com.dp.pages.PrivacyPolicyPage;
 import java.time.Duration;
+import java.util.Set;
 
 public class DPTest {
 
@@ -20,7 +21,7 @@ public class DPTest {
     @BeforeMethod
     public void setUp() {
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless"); // Uncomment to run without opening a UI
+        // options.addArguments("--headless");
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
@@ -33,23 +34,39 @@ public class DPTest {
     public void validateDPPrivacyAndExploreLinks() {
         // 1. Navigate to the DP homepage
         homePage.navigateToHomePage();
+        String originalWindow = driver.getWindowHandle();
 
-        // 2. Scroll down to footer section and click on "Privacy Policy"
+        // 2. Click on "Privacy Policy"
         homePage.clickPrivacyPolicy();
 
         // 3. Switch to the newly opened tab
-        privacyPage.switchToNewTab();
+        switchToNewWindow(originalWindow);
 
         // 4. Validate the url opened correctly
         String expectedPrivacyUrl = "privacy.thewaltdisneycompany.com";
         Assert.assertTrue(privacyPage.isUrlValid(expectedPrivacyUrl), "Privacy Policy URL did not match the expected value!");
 
-        // 5. Click on "Explore DP+" from 'Helpful Links' section
-        privacyPage.clickExploreDP();
+        // 5. Close the Privacy tab and switch back to the main DP page
+        driver.close();
+        driver.switchTo().window(originalWindow);
 
-        // 6. Switch to the next new tab and validate the page title
-        privacyPage.switchToNewTab();
+        // 6. Click on "Explore DP+" from 'Helpful Links' section
+        homePage.clickExploreDP();
+
+        // 7. Switch to the next new tab and validate the page title
+        switchToNewWindow(originalWindow);
         Assert.assertTrue(driver.getTitle().contains("Explore Disney+"), "The Explore DP page did not load correctly.");
+    }
+
+    // Helper method to handle switching to a newly opened tab
+    private void switchToNewWindow(String originalWindow) {
+        Set<String> allWindows = driver.getWindowHandles();
+        for (String windowHandle : allWindows) {
+            if (!windowHandle.equals(originalWindow)) {
+                driver.switchTo().window(windowHandle);
+                break;
+            }
+        }
     }
 
     @AfterMethod
