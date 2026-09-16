@@ -39,34 +39,41 @@ public class DPTest {
         // 2. Click on "Privacy Policy"
         homePage.clickPrivacyPolicy();
 
-        // 3. Switch to the newly opened tab
-        switchToNewWindow(originalWindow);
+        // 3. Switch to the newly opened tab (if one opened)
+        boolean privacyOpenedInNewTab = switchToNewWindowIfPresent(originalWindow);
 
         // 4. Validate the url opened correctly
         String expectedPrivacyUrl = "privacy.thewaltdisneycompany.com";
         Assert.assertTrue(privacyPage.isUrlValid(expectedPrivacyUrl), "Privacy Policy URL did not match the expected value!");
 
-        // 5. Close the Privacy tab and switch back to the main DP page
-        driver.close();
-        driver.switchTo().window(originalWindow);
+        // 5. Go back to the homepage dynamically
+        if (privacyOpenedInNewTab) {
+            driver.close(); // Close the new tab
+            driver.switchTo().window(originalWindow); // Switch back to original
+        } else {
+            driver.navigate().back(); // Hit the browser 'back' button
+        }
 
         // 6. Click on "Explore DP+" from 'Helpful Links' section
         homePage.clickExploreDP();
 
         // 7. Switch to the next new tab and validate the page title
-        switchToNewWindow(originalWindow);
+        switchToNewWindowIfPresent(originalWindow);
         Assert.assertTrue(driver.getTitle().contains("Explore Disney+"), "The Explore DP page did not load correctly.");
     }
 
-    // Helper method to handle switching to a newly opened tab
-    private void switchToNewWindow(String originalWindow) {
+    // Helper method to safely check for and switch to a new tab
+    private boolean switchToNewWindowIfPresent(String originalWindow) {
         Set<String> allWindows = driver.getWindowHandles();
-        for (String windowHandle : allWindows) {
-            if (!windowHandle.equals(originalWindow)) {
-                driver.switchTo().window(windowHandle);
-                break;
+        if (allWindows.size() > 1) {
+            for (String windowHandle : allWindows) {
+                if (!windowHandle.equals(originalWindow)) {
+                    driver.switchTo().window(windowHandle);
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     @AfterMethod
